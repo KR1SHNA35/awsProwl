@@ -48,6 +48,9 @@ class SecretsScanner(AWSServiceBase):
             paginator = self.client.get_paginator("list_secrets")
             for page in paginator.paginate():
                 for secret in page.get("SecretList", []):
+                    if not isinstance(secret, dict):
+                        log.warning("Skipping malformed secret entry: {}", secret)
+                        continue
                     result.resources_found += 1
                     await self._analyze_secret(secret, scan_id, findings)
 
@@ -56,109 +59,119 @@ class SecretsScanner(AWSServiceBase):
 
     async def _analyze_secret(self, secret: dict, scan_id: str, findings: list) -> None:
         """Analyze a single secret for security issues."""
-        secret_name = secret["Name"]
-        secret_arn = secret["ARN"]
+        try:
+            if not isinstance(secret, dict):
+                log.warning("Skipping malformed secret (not dict): {}", secret)
+                return
+            secret_name = secret["Name"]
+            secret_arn = secret["ARN"]
 
-        # Add enumeration finding
-        await self._add_enumeration_finding("secret", secret_name, secret_name, {
-            "arn": secret_arn,
-            "rotation_enabled": secret.get("RotationEnabled", False),
-            "last_rotated": str(secret.get("LastRotatedDate", "")) if secret.get("LastRotatedDate") else "Never",
-            "kms_key_id": secret.get("KmsKeyId", "AWS managed"),
-            "description": secret.get("Description", ""),
-        }, findings, scan_id)
+            # Add enumeration finding
+            await self._add_enumeration_finding("secret", secret_name, secret_name, {
+                "arn": secret_arn,
+                "rotation_enabled": secret.get("RotationEnabled", False),
+                "last_rotated": str(secret.get("LastRotatedDate", "")) if secret.get("LastRotatedDate") else "Never",
+                "kms_key_id": secret.get("KmsKeyId", "AWS managed"),
+                "description": secret.get("Description", ""),
+            }, findings, scan_id)
 
-        # Check rotation
-        rotation_enabled = secret.get("RotationEnabled", False)
-        if not rotation_enabled:
-            self._add_finding_deduped(findings, self.create_finding(
-                title=f"Secret {secret_name} does not have rotation enabled",
-                description="Secret rotation is not configured, increasing risk of long-lived credentials",
-                severity="medium",
-                category="weak_configuration",
-                resource_type="secret",
-                resource_id=secret_name,
-                resource_name=secret_name,
-                region=self.region,
-                evidence=[{"type": "secret_metadata", "description": "Rotation configuration", "data": {"RotationEnabled": rotation_enabled}}],
-                remediation={
-                    "summary": "Enable automatic rotation",
-                    "steps": [
-                        "Create Lambda rotation function",
-                        "Configure secret rotation schedule",
-                        "Test rotation",
-                    ],
-                    "effort": "medium",
-                    "automatable": True,
-                },
-                rule_id="secrets_rotation_disabled",
-            ))
-
-        # Check last rotation date
-        last_rotated = secret.get("LastRotatedDate")
-        if last_rotated:
-            from datetime import datetime, timezone
-            age_days = (datetime.now(timezone.utc) - last_rotated).days
-            if age_days > 90:
+            # Check rotation
+            rotation_enabled = secret.get("RotationEnabled", False)
+            if not rotation_enabled:
                 self._add_finding_deduped(findings, self.create_finding(
-                    title=f"Secret {secret_name} not rotated in {age_days} days",
-                    description=f"Secret was last rotated {age_days} days ago (recommended: rotate every 90 days)",
+                    title=f"Secret {secret_name} does not have rotation enabled",
+                    description="Secret rotation is not configured, increasing risk of long-lived credentials",
                     severity="medium",
                     category="weak_configuration",
                     resource_type="secret",
                     resource_id=secret_name,
                     resource_name=secret_name,
                     region=self.region,
-                    evidence=[{"type": "secret_metadata", "description": "Last rotation date", "data": {"LastRotatedDate": str(last_rotated), "age_days": age_days}}],
+                    evidence=[{"type": "secret_metadata", "description": "Rotation configuration", "data": {"RotationEnabled": rotation_enabled}}],
                     remediation={
-                        "summary": "Rotate secret",
+                        "summary": "Enable automatic rotation",
                         "steps": [
-                            "Trigger manual rotation or wait for scheduled rotation",
-                            "Verify applications work with new secret",
+                            "Create Lambda rotation function",
+                            "Configure secret rotation schedule",
+                            "Test rotation",
                         ],
-                        "effort": "low",
+                        "effort": "medium",
                         "automatable": True,
                     },
-                    rule_id="secrets_old_rotation",
+                    rule_id="secrets_rotation_disabled",
                 ))
 
-        # Check for KMS encryption
-        kms_key_id = secret.get("KmsKeyId")
-        if not kms_key_id:
-            self._add_finding_deduped(findings, self.create_finding(
-                title=f"Secret {secret_name} uses default AWS managed KMS key",
-                description="Secret is encrypted with AWS managed key instead of customer managed key",
-                severity="low",
-                category="encryption_missing",
-                resource_type="secret",
-                resource_id=secret_name,
-                resource_name=secret_name,
-                region=self.region,
-                remediation={
-                    "summary": "Use customer managed KMS key",
-                    "steps": [
-                        "Create customer managed KMS key",
-                        "Re-encrypt secret with new key",
-                        "Update key policy for least privilege",
-                    ],
-                    "effort": "medium",
-                    "automatable": False,
-                },
-                rule_id="secrets_aws_managed_key",
-            ))
+            # Check last rotation date
+            last_rotated = secret.get("LastRotatedDate")
+            if last_rotated:
+                from datetime import datetime, timezone
+                age_days = (datetime.now(timezone.utc) - last_rotated).days
+                if age_days > 90:
+                    self._add_finding_deduped(findings, self.create_finding(
+                        title=f"Secret {secret_name} not rotated in {age_days} days",
+                        description=f"Secret was last rotated {age_days} days ago (recommended: rotate every 90 days)",
+                        severity="medium",
+                        category="weak_configuration",
+                        resource_type="secret",
+                        resource_id=secret_name,
+                        resource_name=secret_name,
+                        region=self.region,
+                        evidence=[{"type": "secret_metadata", "description": "Last rotation date", "data": {"LastRotatedDate": str(last_rotated), "age_days": age_days}}],
+                        remediation={
+                            "summary": "Rotate secret",
+                            "steps": [
+                                "Trigger manual rotation or wait for scheduled rotation",
+                                "Verify applications work with new secret",
+                            ],
+                            "effort": "low",
+                            "automatable": True,
+                        },
+                        rule_id="secrets_old_rotation",
+                    ))
 
-        # Check resource policy
-        await self._check_resource_policy(secret_name, secret_arn, scan_id, findings)
+            # Check for KMS encryption
+            kms_key_id = secret.get("KmsKeyId")
+            if not kms_key_id:
+                self._add_finding_deduped(findings, self.create_finding(
+                    title=f"Secret {secret_name} uses default AWS managed KMS key",
+                    description="Secret is encrypted with AWS managed key instead of customer managed key",
+                    severity="low",
+                    category="encryption_missing",
+                    resource_type="secret",
+                    resource_id=secret_name,
+                    resource_name=secret_name,
+                    region=self.region,
+                    remediation={
+                        "summary": "Use customer managed KMS key",
+                        "steps": [
+                            "Create customer managed KMS key",
+                            "Re-encrypt secret with new key",
+                            "Update key policy for least privilege",
+                        ],
+                        "effort": "medium",
+                        "automatable": False,
+                    },
+                    rule_id="secrets_aws_managed_key",
+                ))
 
-        # Check secret versioning
-        await self._check_secret_versions(secret_name, secret_arn, scan_id, findings)
+            # Check resource policy
+            await self._check_resource_policy(secret_name, secret_arn, scan_id, findings)
+
+            # Check secret versioning
+            await self._check_secret_versions(secret_name, secret_arn, scan_id, findings)
+
+        except Exception as e:
+            log.error("Error analyzing secret: {}", e)
 
     async def _check_resource_policy(self, secret_name: str, secret_arn: str, scan_id: str, findings: list) -> None:
         """Check secret resource policy for overly permissive access."""
         try:
             policy = self.client.get_resource_policy(SecretId=secret_name)
             import json
-            policy_doc = json.loads(policy["ResourcePolicy"])
+            resource_policy = policy.get("ResourcePolicy")
+            if not resource_policy:
+                return
+            policy_doc = json.loads(resource_policy)
 
             statements = policy_doc.get("Statement", [])
             if not isinstance(statements, list):
