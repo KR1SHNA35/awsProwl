@@ -1,0 +1,61 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Test and coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+awsprowl.log
+awsprowl-output/
+output/
+
+# Local config
+config.local.yaml
+*.local.yaml
+
+# Environment files
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Type checking
+.pyc

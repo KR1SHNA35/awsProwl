@@ -1,0 +1,191 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "awsprowl"
+version = "0.1.0"
+description = "awsProwl is an AWS security research framework for authorized penetration testing, CTF competitions, and cloud security assessments. It unifies deep service enumeration, privilege-escalation analysis, exploitation, persistence, and data-exfiltration modules across 30 AWS services (348 modules) inside one operator-friendly interface with interactive TUI and classic shell modes."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "KR1SHNA35"}
+]
+keywords = [
+    "aws", "security", "penetration-testing", "ctf", "iam", "privilege-escalation",
+    "cloud-security", "aws-assessment", "red-team", "devsecops"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: System :: Systems Administration",
+]
+dependencies = [
+    # Core AWS SDK
+    "boto3>=1.34.0",
+    "botocore>=1.34.0",
+
+    # CLI & Terminal UI
+    "rich>=13.7.0",
+    "click>=8.1.0",
+    "prompt-toolkit>=3.0.0",
+    "pyfiglet>=1.0.0",
+
+    # Configuration
+    "pyyaml>=6.0.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+
+    # HTTP & Async
+    "httpx>=0.25.0",
+    "aiofiles>=23.2.0",
+    "requests>=2.31.0",
+
+    # Data Processing
+    "orjson>=3.9.0",
+    "python-dateutil>=2.8.0",
+
+    # Logging
+    "loguru>=0.7.0",
+
+    # Progress & Utils
+    "tqdm>=4.66.0",
+    "tenacity>=8.2.0",
+
+    # Web Server
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    "websockets>=12.0",
+
+    # Report Generation
+    "jinja2>=3.1.0",
+
+    # Database
+    "sqlalchemy>=2.0.0",
+    "sqlalchemy-utils>=0.41.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "moto>=4.2.0",
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+    "pre-commit>=3.5.0",
+]
+web = [
+    "uvicorn[standard]>=0.24.0",
+]
+full = [
+    "awsprowl[dev,web]",
+]
+
+[project.scripts]
+awsprowl = "awsprowl.cli.main:main"
+
+[project.urls]
+Homepage = "https://github.com/KR1SHNA35/awsProwl"
+Repository = "https://github.com/KR1SHNA35/awsProwl"
+Issues = "https://github.com/KR1SHNA35/awsProwl/issues"
+Documentation = "https://docs.awsprowl.dev"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["awsprowl*"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = [
+    "E", "F", "I", "N", "W", "UP", "B", "C4", "SIM", "T20", "PTH", "ERA", "RET", "ARG"
+]
+ignore = [
+    "S101",  # assert in tests
+    "T201",  # print in CLI
+    "TRY003", # avoiding broad exception
+]
+
+[tool.ruff.per-file-ignores]
+"tests/*" = ["S101", "T201"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = true
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+strict = true
+exclude = ["tests/", "scripts/", "frontend/"]
+
+# Ignore missing stubs for external libraries
+[[tool.mypy.overrides]]
+module = [
+    "boto3.*",
+    "botocore.*",
+    "sqlalchemy.*",
+    "pydantic.*",
+    "loguru.*",
+    "rich.*",
+    "click.*",
+    "prompt_toolkit.*",
+    "pyfiglet.*",
+    "httpx.*",
+    "fastapi.*",
+    "uvicorn.*",
+    "websockets.*",
+    "yaml.*",
+]
+ignore_missing_imports = true
+
+# Allow untyped decorators
+[[tool.mypy.overrides]]
+module = "awsprowl.*"
+allow_untyped_decorators = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.pytest-asyncio]
+mode = "auto"
+default_fixture_loop_scope = "function"
+
+[tool.coverage.run]
+source = ["src/awsprowl"]
+omit = ["tests/*", "scripts/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+
+[tool.pydantic]
+validate_assignment = true
+extra = "forbid"
