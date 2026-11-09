@@ -1038,13 +1038,18 @@ class ModuleBrowserTUI:
         self.console.print()
 
         profiles = self._load_profiles_fast()
-        services = self.get_services()
-        total_modules = sum(len(self.get_modules_for_service(s)) for s in services)
+        
+        # Use actual module registry for honest counts
+        from awsprowl.modules import list_modules, ModuleCategory
+        all_modules = list_modules()
+        service_scanners = 28  # Actual scanners in awsprowl.aws
+        attack_modules = len([m for m in all_modules if m.category in (ModuleCategory.ENUM, ModuleCategory.PRIVESC, ModuleCategory.EXPLOIT, ModuleCategory.PERSIST, ModuleCategory.BACKDOOR, ModuleCategory.EXFIL)])
+        total_modules = len(all_modules)
 
         stats_panel = Panel(
             f"[bold]AWS Profile:[/bold] [cyan]{self.current_profile or 'default'}[/cyan]  "
             f"[bold]Profiles:[/bold] [green]{len(profiles)}[/green]  "
-            f"[bold]Services:[/bold] [yellow]{len(services)}[/yellow]  "
+            f"[bold]Services:[/bold] [yellow]{service_scanners}[/yellow]  "
             f"[bold]Modules:[/bold] [magenta]{total_modules}[/magenta]",
             border_style="cyan", padding=(0, 2), box=box.HEAVY,
         )
