@@ -42,8 +42,8 @@ It's built for practitioners who need **speed, precision, and operational discip
 
 | Capability | Coverage |
 |---|---:|
-| AWS services | 30 |
-| Modules | 410 |
+| AWS services | 28 |
+| Modules | 202 |
 | Module categories | 6 |
 | Scan profiles | 5 |
 | Report formats | Table, JSON, HTML, Markdown, SARIF, with CSV export |
@@ -473,7 +473,7 @@ awsprowl version [--short] [--json]
 
 ```bash
 awsprowl version # Full version display with dependencies
-awsprowl version --short # Just version number (0.1.0)
+awsprowl version --short # Just version number (2.0.0)
 awsprowl version --json # JSON output for scripting
 ```
 
