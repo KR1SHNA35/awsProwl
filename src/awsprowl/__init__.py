@@ -1,6 +1,6 @@
 """awsProwl - AWS Security Research Tool."""
 
-__version__ = "0.1.0"
+__version__ = "2.0.0"
 __author__ = "awsProwl Team"
 __description__ = "AWS Security Research Tool for CTF and Security Assessments"
 

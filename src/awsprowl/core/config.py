@@ -105,7 +105,7 @@ class Config(BaseSettings):
     ui: UIConfig = Field(default_factory=UIConfig)
 
     # Metadata
-    version: str = "0.1.0"
+    version: str = "2.0.0"
     config_version: int = 1
 
     @field_validator("aws")

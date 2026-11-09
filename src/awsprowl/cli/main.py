@@ -54,7 +54,7 @@ console = Console()
     default=True,
     help="Enable/disable interactive TUI mode (default: enabled)",
 )
-@click.version_option(version="0.1.0", prog_name="awsProwl")
+@click.version_option(version="2.0.0", prog_name="awsProwl")
 @click.pass_context
 def main(
     ctx: click.Context,
