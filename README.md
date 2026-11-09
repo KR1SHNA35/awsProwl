@@ -22,7 +22,7 @@ Authorized penetration testing · CTFs · Cloud security assessments
 [![AWS](https://img.shields.io/badge/AWS-boto3-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://boto3.amazonaws.com)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-64748B?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/KR1SHNA35/awsProwl)
 
-**30 services · 410 modules · 6 categories · Interactive TUI and classic shell**
+**28 services · 202 modules · 6 categories · Interactive TUI and classic shell**
 
 <img src="src/utils/banner.png" alt="awsProwl terminal home screen" width="900">
 
@@ -59,7 +59,7 @@ It's built for practitioners who need **speed, precision, and operational discip
 
 | Problem | Solution |
 | --- | --- |
-| Fragmented AWS tooling | One framework covering 30 services, 348 modules |
+| Fragmented AWS tooling | One framework covering 28 services, 202 modules |
 | Manual privesc research | Automated detection across IAM, EC2, S3, Lambda, VPC, CodeBuild |
 | No safe enumeration mode | `ENUM` category — read-only, zero state changes |
 | Poor CI/CD integration | SARIF, HTML, Markdown, JSON, CSV output |
@@ -72,7 +72,7 @@ It's built for practitioners who need **speed, precision, and operational discip
 
 ### Multi-Service Coverage
 
-**30 AWS services**, each with dedicated scanners spanning enumeration, security checks, and attack modules across **6 categories** — **410 modules total**.
+**28 AWS services**, each with dedicated scanners spanning enumeration, security checks, and attack modules across **6 categories** — **202 modules total**.
 
 | Domain | Services |
 | --- | --- |
@@ -88,12 +88,12 @@ It's built for practitioners who need **speed, precision, and operational discip
 
 | Category | Count | Risk | Authorization | What it does |
 | --- | --- | --- | --- | --- |
-| **ENUM** | 91 | Safe | Read-only | Comprehensive enumeration — users, roles, policies, buckets, instances, functions, clusters, secrets, certificates, trails, keys, topics, repos, dashboards, log groups, alarms, and more |
-| **PRIVESC** | 40 | Low–Critical | Read-only analysis | Privilege-escalation path detection across IAM, EC2, S3, Lambda, CodeBuild, VPC |
-| **EXPLOIT** | 112 | High–Critical | Explicit confirmation | Active exploitation — resource creation, policy/role manipulation, attribute changes |
-| **PERSIST** | 59 | High–Critical | Explicit confirmation | Persistence mechanisms — backup credentials, trust-policy changes, service-linked roles |
-| **BACKDOOR** | 44 | Critical | Explicit confirmation | Backdoor creation — permissive trust policies, attacker-controlled identity providers |
-| **EXFIL** | 64 | Medium–Critical | Explicit confirmation | Data exfiltration — snapshots, logs, findings, secrets, images, parameters |
+| **ENUM** | 18 | Safe | Read-only | Comprehensive enumeration — users, roles, policies, buckets, instances, functions, clusters, secrets, certificates, trails, keys, topics, repos, dashboards, log groups, alarms, and more |
+| **PRIVESC** | 18 | Low–Critical | Read-only analysis | Privilege-escalation path detection across IAM, EC2, S3, Lambda, CodeBuild, VPC |
+| **EXPLOIT** | 33 | High–Critical | Explicit confirmation | Active exploitation — resource creation, policy/role manipulation, attribute changes |
+| **PERSIST** | 39 | High–Critical | Explicit confirmation | Persistence mechanisms — backup credentials, trust-policy changes, service-linked roles |
+| **BACKDOOR** | 30 | Critical | Explicit confirmation | Backdoor creation — permissive trust policies, attacker-controlled identity providers |
+| **EXFIL** | 32 | Medium–Critical | Explicit confirmation | Data exfiltration — snapshots, logs, findings, secrets, images, parameters |
 
 > **ENUM** and **PRIVESC** never touch account state. Everything from **EXPLOIT** down requires a typed `CONFIRM`.
 
@@ -132,7 +132,7 @@ The category labels describe the intent of a module, not a guarantee that every 
 │                         Stalk the Cloud                                 │
 │                                                                          │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ Profile: production │ Profiles: 3 │ Services: 30 │ Modules: 410          │
+│ Profile: production │ Profiles: 3 │ Services: 28 │ Modules: 202          │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ [IAM]    iam       54 modules  [ENUM] [PRIV-ESC] [EXPLOIT] [PERSIST]     │
 │                                [BACKDOOR] [EXFIL]                         │
